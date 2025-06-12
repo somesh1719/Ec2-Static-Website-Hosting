@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArcCity | Premium Real Estate Platform</title>
+  <link rel="icon" type="image/x-icon" href="https://img.icons8.com/external-vitaliy-gorbachev-lineal-color-vitaly-gorbachev/60/external-city-architecture-vitaliy-gorbachev-lineal-color-vitaly-gorbachev.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.css">
+  <style>
+    :root {
+      --primary-color: #4a6bff;
+      --secondary-color: #ff6b4a;
+      --dark-color: #2c3e50;
+      --light-color: #f8f9fa;
+      --success-color: #2ecc71;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    #map {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* Header Section */
+    .header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background-color: white;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    .logo-container:hover {
+      background-color: rgba(74, 107, 255, 0.1);
+    }
+
+    .logo {
+      height: 40px;
+      width: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    /* Search Container */
+    .search-container {
+      width: 550px;
+      height: 50px;
+      position: relative;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      z-index: 1001;
+      transition: all 0.3s ease;
+      margin-left: 20px;
+    }
+
+    .search-container:focus-within {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      outline: none;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .search-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--primary-color);
+      font-size: 16px;
+    }
+
+    .result-box {
+      position: absolute;
+      top: 55px;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+      max-height: 350px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1002;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .suggestion-item {
+      padding: 14px 18px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f8faff;
+    }
+
+    .suggestion-icon {
+      margin-right: 12px;
+      color: var(--primary-color);
+      width: 22px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .suggestion-content {
+      flex: 1;
+    }
+
+    .suggestion-content h3 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--dark-color);
+      font-weight: 600;
+    }
+
+    .suggestion-content p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .suggestion-type {
+      font-size: 11px;
+      color: #666;
+      margin-left: 12px;
+      background: #f0f2f5;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    /* Promotional Banner - Premium Version */
+    .promo-banner {
+      position: absolute;
+      top: 80px;
+      left: 30px;
+      width: 320px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      z-index: 1001;
+      overflow: hidden;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .promo-header {
+      background-color: var(--primary-color);
+      padding: 12px 18px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .promo-content {
+      padding: 18px;
+    }
+
+    .promo-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark-color);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .promo-location {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .promo-location i {
+      margin-right: 6px;
+      color: var(--primary-color);
+    }
+
+    .promo-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark-color);
+      margin-bottom: 12px;
+    }
+
+    .promo-price span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .promo-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: #555;
+    }
+
+    .feature i {
+      margin-right: 6px;
+      color: var(--primary-color);
+      font-size: 14px;
+    }
+
+    .promo-button {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, var(--primary-color), #6a4aff);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(74, 107, 255, 0.3);
+    }
+
+    .promo-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(74, 107, 255, 0.4);
+    }
+
+    .close-promo {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.8);
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .close-promo:hover {
+      color: white;
+    }
+
+    /* Project Gallery */
+    .project-gallery {
+      position: relative;
+      height: 180px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .swiper {
+      width: 100%;
+      height: 100%;
+    }
+
+    .swiper-slide {
+      background-size: cover;
+      background-position: center;
+    }
+
+    .swiper-pagination-bullet {
+      background: white;
+      opacity: 0.6;
+    }
+
+    .swiper-pagination-bullet-active {
+      background: var(--primary-color);
+      opacity: 1;
+    }
+
+    .swiper-button-next, .swiper-button-prev {
+      color: white;
+      background: rgba(0,0,0,0.3);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      backdrop-filter: blur(2px);
+    }
+
+    .swiper-button-next:after, .swiper-button-prev:after {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    /* Category Buttons */
+    .category-buttons {
+      position: absolute;
+      top: 80px;
+      left: 370px;
+      display: flex;
+      gap: 12px;
+      z-index: 1001;
+    }
+
+    .category-button {
+      padding: 10px 18px;
+      background-color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .category-button:hover {
+      background-color: #f5f7ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .category-button img {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Map Controls */
+    .ol-zoom {
+      top: 90px !important;
+      left: 30px !important;
+      background: rgba(255,255,255,0.9) !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    }
+
+    /* Recent searches */
+    .recent-searches {
+      padding: 12px 18px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .recent-title {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .recent-item {
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      padding: 6px 12px;
+      background: #f5f7ff;
+      border-radius: 15px;
+      font-size: 13px;
+      color: var(--primary-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(74, 107, 255, 0.2);
+    }
+
+    .recent-item:hover {
+      background: #e0e6ff;
+    }
+
+    /* 3D View Button */
+    .view-3d {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      font-weight: 600;
+      color: var(--primary-color);
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .view-3d:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .view-3d i {
+      font-size: 18px;
+    }
+
+    /* VR Mode Button */
+    .vr-mode {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      z-index: 1001;
+      background: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      font-weight: 600;
+      color: var(--secondary-color);
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .vr-mode:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .vr-mode i {
+      font-size: 18px;
+    }
+
+    /* Property Highlights */
+    .highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .highlight {
+      background: #f5f7ff;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Developer Badge */
+    .developer-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--success-color);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    /* Price Trend Indicator */
+    .price-trend {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .trend-up {
+      color: #e74c3c;
+    }
+
+    .trend-down {
+      color: #2ecc71;
+    }
+
+    .trend-neutral {
+      color: #666;
+    }
+
+    /* Hide Ad Button */
+    .hide-ad-button {
+      position: absolute;
+      bottom: 15px;
+      left: 30px;
+      z-index: 1001;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 15px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .hide-ad-button:hover {
+      background: white;
+      color: var(--primary-color);
+    }
+
+    /* Contact Popup Styles */
+    .contact-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .contact-popup.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .contact-container {
+      background: white;
+      border-radius: 12px;
+      width: 350px;
+      max-width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .contact-popup.active .contact-container {
+      transform: translateY(0);
+    }
+
+    .contact-header {
+      background: var(--primary-color);
+      padding: 15px 20px;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contact-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .contact-content {
+      padding: 20px;
+    }
+
+    .contact-number {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark-color);
+      text-align: center;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .contact-number i {
+      color: var(--primary-color);
+    }
+
+    .contact-info {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
+    }
+
+    .otp-section {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .otp-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .otp-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .otp-input {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .otp-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
+    }
+
+    .submit-button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .submit-button:hover {
+      background: #3a5bef;
+    }
+
+    .submit-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .otp-button {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .otp-button:hover {
+      background: #3a5bef;
+    }
+
+    .otp-resend {
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .otp-resend a {
+      color: var(--primary-color);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .otp-resend a:hover {
+      text-decoration: underline;
+    }
+
+    .contact-success {
+      text-align: center;
+      padding: 20px;
+      display: none;
+    }
+
+    .contact-success i {
+      font-size: 50px;
+      color: var(--success-color);
+      margin-bottom: 15px;
+    }
+
+    .contact-success h3 {
+      font-size: 18px;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+    }
+
+    .contact-success p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .success-button {
+      width: 100%;
+      padding: 12px;
+      background: var(--success-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .success-button:hover {
+      background: #27ae60;
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  
+  <!-- Header with Logo and Search -->
+  <div class="header">
+    <div class="logo-container">
+      <img src="https://img.icons8.com/external-vitaliy-gorbachev-lineal-color-vitaly-gorbachev/60/external-city-architecture-vitaliy-gorbachev-lineal-color-vitaly-gorbachev.png" alt="ArcCity" class="logo">
+      <h1 class="logo-text">ArcCity</h1>
+    </div>
+    <div class="search-container">
+      <input type="text" placeholder="Search for localities, builders, projects..." class="search-input" autocomplete="off">
+      <button class="search-button"><i class="fas fa-search"></i></button>
+      <div class="result-box">
+        <!-- Recent searches section -->
+        <div class="recent-searches">
+          <div class="recent-title">Recent Searches</div>
+          <div class="recent-item">Mahalaxmi Layout</div>
+          <div class="recent-item">Reshimbagh</div>
+          <div class="recent-item">Dharampeth</div>
+          <div class="recent-item">Wardha Road</div>
+          <div class="recent-item">Mihan</div>
+        </div>
+        <!-- Suggestions will be added here dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Promotional Banner -->
+  <div class="promo-banner" id="promoBanner">
+    <div class="promo-header">
+      <span>PREMIUM LISTING</span>
+      <button class="close-promo">&times;</button>
+    </div>
+    <div class="promo-content">
+      <!-- Project Image Gallery -->
+      <div class="project-gallery">
+        <div class="swiper">
+          <div class="swiper-wrapper">
+            <div class="swiper-slide" style="background-image: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80')"></div>
+            <div class="swiper-slide" style="background-image: url('https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80')"></div>
+            <div class="swiper-slide" style="background-image: url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80')"></div>
+            <div class="swiper-slide" style="background-image: url('https://images.unsplash.com/photo-1600607688969-a5bfcd646154?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80')"></div>
+          </div>
+          <div class="swiper-pagination"></div>
+          <div class="swiper-button-next"></div>
+          <div class="swiper-button-prev"></div>
+        </div>
+      </div>
+      
+      <div class="developer-badge">TRUSTED DEVELOPER</div>
+      
+      <div class="promo-title">Mahalaxmi Elite - Premium Plots & Villas</div>
+      <div class="promo-location">
+        <i class="fas fa-map-marker-alt"></i> Prime Location, Nagpur
+      </div>
+      
+      <div class="promo-price">₹ 4,200/sq.ft <span>| 12% ↑ last 6 months</span></div>
+      
+      <div class="highlights">
+        <div class="highlight"><i class="fas fa-certificate"></i> RERA Approved</div>
+        <div class="highlight"><i class="fas fa-tree"></i> Green Zone</div>
+        <div class="highlight"><i class="fas fa-shield-alt"></i> Gated Community</div>
+        <div class="highlight"><i class="fas fa-water"></i> Lake View</div>
+      </div>
+      
+      <div class="promo-features">
+        <div class="feature"><i class="fas fa-vector-square"></i> 1000-5000 sq.ft</div>
+        <div class="feature"><i class="fas fa-calendar-alt"></i> Possession: 2024</div>
+        <div class="feature"><i class="fas fa-road"></i> 60ft Wide Roads</div>
+        <div class="feature"><i class="fas fa-percentage"></i> 70% Open Space</div>
+      </div>
+      
+      <button class="promo-button" id="contactDeveloper">
+        <i class="fas fa-phone-alt"></i> Contact Developer
+      </button>
+    </div>
+  </div>
+
+  <!-- Hide Ad Button -->
+  <button class="hide-ad-button" id="hideAdButton">
+    <i class="fas fa-eye-slash"></i> Hide Ad
+  </button>
+
+  <!-- Smart Category Buttons -->
+  <div class="category-buttons">
+    <button class="category-button"><img src="https://cdn-icons-png.flaticon.com/512/3917/3917754.png" alt="Smart Search"> Smart Search</button>
+    <button class="category-button"><img src="https://cdn-icons-png.flaticon.com/512/2983/2983925.png" alt="Price Trends"> Price Trends</button>
+    <button class="category-button"><img src="https://cdn-icons-png.flaticon.com/512/3344/3344385.png" alt="Virtual Tours"> Virtual Tours</button>
+    <button class="category-button"><img src="https://cdn-icons-png.flaticon.com/512/3449/3449457.png" alt="Loan Calculator"> Loan Calculator</button>
+    <button class="category-button"><img src="https://cdn-icons-png.flaticon.com/512/2292/2292038.png" alt="Legal Check"> Legal Check</button>
+  </div>
+
+  <!-- 3D View Button -->
+  <button class="view-3d">
+    <i class="fas fa-cube"></i> 3D Site View
+  </button>
+
+  <!-- VR Mode Button -->
+  <button class="vr-mode">
+    <i class="fas fa-vr-cardboard"></i> VR Walkthrough
+  </button>
+
+  <!-- Contact Developer Popup -->
+  <div class="contact-popup" id="contactPopup">
+    <div class="contact-container">
+      <div class="contact-header">
+        <span>Contact Developer</span>
+        <button class="contact-close">&times;</button>
+      </div>
+      <div class="contact-content" id="contactContent">
+        <div class="contact-number">
+          <i class="fas fa-phone-alt"></i> +91 XXXXX XXXXX
+        </div>
+        <div class="contact-info">
+          For security reasons, please verify your number to view the complete contact details.
+        </div>
+        
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" placeholder="Enter your first name">
+          <div class="error-message" id="firstNameError">Please enter your first name</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" placeholder="Enter your phone number">
+          <div class="error-message" id="phoneError">Please enter a valid 10-digit phone number</div>
+        </div>
+        
+        <button class="submit-button" id="submitDetails">Submit & Get OTP</button>
+        
+        <div class="otp-section" id="otpSection">
+          <div class="otp-title">Enter 4-digit OTP sent to your mobile</div>
+          <div class="otp-inputs">
+            <input type="text" class="otp-input" maxlength="1" data-index="0">
+            <input type="text" class="otp-input" maxlength="1" data-index="1">
+            <input type="text" class="otp-input" maxlength="1" data-index="2">
+            <input type="text" class="otp-input" maxlength="1" data-index="3">
+          </div>
+          <div class="error-message" id="otpError">Invalid OTP. Please try again.</div>
+          <button class="otp-button" id="verifyOtp">Verify OTP</button>
+          <div class="otp-resend">
+            Didn't receive OTP? <a id="resendOtp">Resend OTP</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="contact-success" id="contactSuccess">
+        <i class="fas fa-check-circle"></i>
+        <h3>Verification Successful!</h3>
+        <p>You can now view the complete contact details of the developer.</p>
+        <div class="contact-number">
+          <i class="fas fa-phone-alt"></i> +91 98765 43210
+        </div>
+        <div class="contact-info">
+          The developer has been notified of your interest.
+        </div>
+        <button class="success-button" id="closeSuccess">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.4.5/swiper-bundle.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      // Initialize map with custom style
+      const map = new ol.Map({
+        target: 'map',
+        layers: [
+          new ol.layer.Tile({
+            source: new ol.source.OSM({
+              url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            })
+          })
+        ],
+        view: new ol.View({
+          center: ol.proj.fromLonLat([79.0882, 21.1458]), // Nagpur coordinates
+          zoom: 12
+        })
+      });
+
+      // Add a marker for Mahalaxmi Elite project
+      const marker = new ol.layer.Vector({
+        source: new ol.source.Vector({
+          features: [
+            new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.fromLonLat([79.095, 21.135]))
+            })
+          ]
+        }),
+        style: new ol.style.Style({
+          image: new ol.style.Icon({
+            anchor: [0.5, 1],
+            src: 'https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.15.1/examples/data/icon.png'
+          })
+        })
+      });
+      map.addLayer(marker);
+
+      // Initialize image gallery swiper
+      const swiper = new Swiper('.swiper', {
+        loop: true,
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+      });
+
+      // Sample suggestion data
+      const suggestions = [
+        {
+          name: "Mahalaxmi Elite",
+          type: "Premium Project",
+          location: "Wardha Road, Nagpur",
+          category: "project",
+          priceTrend: "up",
+          trendValue: "12%"
+        },
+        {
+          name: "Mahalaxmi Developers",
+          type: "Trusted Builder",
+          location: "Nagpur",
+          category: "builder",
+          rating: "4.8"
+        },
+        {
+          name: "Mahalaxmi Layout Phase 2",
+          type: "Residential Plots",
+          location: "Nagpur",
+          category: "locality",
+          priceTrend: "up",
+          trendValue: "8%"
+        },
+        {
+          name: "Mahalaxmi Residency",
+          type: "Luxury Apartments",
+          location: "Nagpur",
+          category: "project",
+          priceTrend: "up",
+          trendValue: "15%"
+        },
+        {
+          name: "Mahavir Business Park",
+          type: "Commercial Complex",
+          location: "Nagpur",
+          category: "commercial",
+          priceTrend: "neutral"
+        },
+        {
+          name: "Mahaveer Nagar",
+          type: "Established Locality",
+          location: "Nagpur",
+          category: "locality",
+          priceTrend: "up",
+          trendValue: "5%"
+        },
+        {
+          name: "Elevate Tech Park",
+          type: "IT Commercial",
+          location: "Mihan, Nagpur",
+          category: "commercial",
+          priceTrend: "up",
+          trendValue: "20%"
+        },
+        {
+          name: "Reshimbagh Greens",
+          type: "Gated Community",
+          location: "Nagpur",
+          category: "project",
+          priceTrend: "up",
+          trendValue: "10%"
+        }
+      ];
+
+      // Search functionality
+      const searchInput = $('.search-input');
+      const resultBox = $('.result-box');
+      const recentSearches = $('.recent-searches');
+
+      searchInput.on('input', function() {
+        const query = $(this).val().trim().toLowerCase();
+        
+        if (query.length === 0) {
+          recentSearches.show();
+          resultBox.show();
+          $('.suggestion-item').remove();
+          return;
+        } else {
+          recentSearches.hide();
+        }
+
+        // Filter suggestions based on query
+        const filtered = suggestions.filter(item => 
+          item.name.toLowerCase().includes(query) || 
+          item.location.toLowerCase().includes(query) ||
+          item.type.toLowerCase().includes(query)
+        );
+
+        $('.suggestion-item').remove();
+
+        if (filtered.length === 0) {
+          resultBox.append(`
+            <div class="suggestion-item">
+              <i class="fas fa-search suggestion-icon"></i>
+              <div class="suggestion-content">
+                <h3>No results found</h3>
+                <p>Try a different search term</p>
+              </div>
+            </div>
+          `);
+        } else {
+          filtered.forEach(item => {
+            let icon, priceTrend;
+            switch(item.category) {
+              case 'locality': icon = 'fa-map-marker-alt'; break;
+              case 'builder': icon = 'fa-building'; break;
+              case 'project': icon = 'fa-home'; break;
+              case 'landmark': icon = 'fa-landmark'; break;
+              case 'commercial': icon = 'fa-briefcase'; break;
+              default: icon = 'fa-map-marker-alt';
+            }
+
+            if (item.priceTrend) {
+              if (item.priceTrend === "up") {
+                priceTrend = `<span class="price-trend trend-up"><i class="fas fa-arrow-up"></i> ${item.trendValue} last year</span>`;
+              } else if (item.priceTrend === "down") {
+                priceTrend = `<span class="price-trend trend-down"><i class="fas fa-arrow-down"></i> ${item.trendValue} last year</span>`;
+              } else {
+                priceTrend = `<span class="price-trend trend-neutral"><i class="fas fa-equals"></i> Stable</span>`;
+              }
+            } else {
+              priceTrend = '';
+            }
+
+            const rating = item.rating ? `<span class="suggestion-type" style="background:#fff8e1;color:#ff9800;"><i class="fas fa-star"></i> ${item.rating}</span>` : '';
+
+            resultBox.append(`
+              <div class="suggestion-item">
+                <i class="fas ${icon} suggestion-icon"></i>
+                <div class="suggestion-content">
+                  <h3>${item.name}</h3>
+                  <p>${item.location}</p>
+                  ${priceTrend}
+                </div>
+                <span class="suggestion-type">${item.type}</span>
+                ${rating}
+              </div>
+            `);
+          });
+        }
+
+        resultBox.show();
+      });
+
+      // Handle suggestion click
+      resultBox.on('click', '.suggestion-item', function() {
+        const suggestionText = $(this).find('h3').text();
+        searchInput.val(suggestionText);
+        resultBox.hide();
+        
+        // Center map on selected location (simplified)
+        const selected = suggestions.find(item => item.name === suggestionText);
+        if (selected) {
+          // In a real app, you would use actual coordinates for each location
+          const coords = [79.0882 + (Math.random() * 0.02 - 0.01), 21.1458 + (Math.random() * 0.02 - 0.01)];
+          map.getView().setCenter(ol.proj.fromLonLat(coords));
+          map.getView().setZoom(15);
+        }
+      });
+
+      // Close promo banner
+      $('.close-promo').click(function() {
+        $('#promoBanner').hide();
+        $('#hideAdButton').hide();
+      });
+
+      // Hide ad button functionality
+      $('#hideAdButton').click(function() {
+        $('#promoBanner').hide();
+        $(this).hide();
+      });
+
+      // Hide results when clicking outside
+      $(document).click(function(e) {
+        if (!$(e.target).closest('.search-container').length) {
+          resultBox.hide();
+        }
+      });
+
+      // Show recent searches when search input is focused
+      searchInput.on('focus', function() {
+        if ($(this).val().trim() === '') {
+          recentSearches.show();
+          $('.suggestion-item').remove();
+          resultBox.show();
+        }
+      });
+
+      // Handle recent search click
+      $('.recent-item').click(function() {
+        searchInput.val($(this).text());
+        resultBox.hide();
+      });
+
+      // 3D View Button Click
+      $('.view-3d').click(function() {
+        alert('Launching 3D Site View...\nThis would open an interactive 3D model of the property in a real implementation.');
+      });
+
+      // VR Mode Button Click
+      $('.vr-mode').click(function() {
+        alert('Starting VR Walkthrough...\nThis would launch a virtual reality tour of the property in a real implementation.');
+      });
+
+      // Simulate price trends data
+      function simulatePriceTrends() {
+        $('.price-trend').each(function() {
+          const trend = Math.random() > 0.5 ? 'up' : 'down';
+          const value = Math.floor(Math.random() * 15) + 1;
+          $(this).removeClass('trend-up trend-down trend-neutral');
+          
+          if (Math.random() > 0.8) {
+            $(this).addClass('trend-neutral').html('<i class="fas fa-equals"></i> Stable');
+          } else if (trend === 'up') {
+            $(this).addClass('trend-up').html(`<i class="fas fa-arrow-up"></i> ${value}% last year`);
+          } else {
+            $(this).addClass('trend-down').html(`<i class="fas fa-arrow-down"></i> ${value}% last year`);
+          }
+        });
+      }
+
+      // Update trends every 10 seconds (simulation)
+      setInterval(simulatePriceTrends, 10000);
+
+      // Contact Developer Popup Functionality
+      const contactPopup = $('#contactPopup');
+      const contactDeveloperBtn = $('#contactDeveloper');
+      const submitDetailsBtn = $('#submitDetails');
+      const verifyOtpBtn = $('#verifyOtp');
+      const resendOtpBtn = $('#resendOtp');
+      const closeSuccessBtn = $('#closeSuccess');
+      const otpSection = $('#otpSection');
+      const contactSuccess = $('#contactSuccess');
+      const contactContent = $('#contactContent');
+      const otpInputs = $('.otp-input');
+      const firstNameInput = $('#firstName');
+      const phoneInput = $('#phoneNumber');
+      const firstNameError = $('#firstNameError');
+      const phoneError = $('#phoneError');
+      const otpError = $('#otpError');
+      
+      let generatedOtp = '';
+      let userPhoneNumber = '';
+
+      // Show contact popup
+      contactDeveloperBtn.click(function() {
+        contactPopup.addClass('active');
+        firstNameInput.focus();
+      });
+
+      // Close contact popup
+      $('.contact-close, #closeSuccess').click(function() {
+        contactPopup.removeClass('active');
+        resetOtpForm();
+      });
+
+      // Submit user details and request OTP
+      submitDetailsBtn.click(function() {
+        const firstName = firstNameInput.val().trim();
+        const phone = phoneInput.val().trim();
+        let isValid = true;
+
+        // Validate first name
+        if (firstName === '') {
+          firstNameError.show();
+          isValid = false;
+        } else {
+          firstNameError.hide();
+        }
+
+        // Validate phone number (simple 10-digit validation)
+        if (!/^\d{10}$/.test(phone)) {
+          phoneError.show();
+          isValid = false;
+        } else {
+          phoneError.hide();
+        }
+
+        if (isValid) {
+          // In a real app, you would send OTP to user's phone
+          generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+          userPhoneNumber = phone;
+          
+          // Mask phone number for display
+          const maskedPhone = phone.substring(0, 3) + 'XXXX' + phone.substring(7);
+          alert(`OTP sent to +91 ${maskedPhone}: ${generatedOtp}\n(In a real app, this would be sent via SMS)`);
+          
+          // Hide form and show OTP section
+          $('.form-group').hide();
+          submitDetailsBtn.hide();
+          otpSection.show();
+          otpInputs.first().focus();
+        }
+      });
+
+      // Resend OTP
+      resendOtpBtn.click(function() {
+        generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
+        
+        // Mask phone number for display
+        const maskedPhone = userPhoneNumber.substring(0, 3) + 'XXXX' + userPhoneNumber.substring(7);
+        alert(`New OTP sent to +91 ${maskedPhone}: ${generatedOtp}\n(In a real app, this would be sent via SMS)`);
+        
+        // Clear previous inputs
+        otpInputs.val('');
+        otpInputs.first().focus();
+        otpError.hide();
+      });
+
+      // Verify OTP
+      verifyOtpBtn.click(function() {
+        const enteredOtp = otpInputs.map(function() {
+          return $(this).val();
+        }).get().join('');
+        
+        if (enteredOtp === generatedOtp) {
+          contactContent.hide();
+          contactSuccess.show();
+          
+          // In a real app, you would notify the developer of the contact request
+          console.log(`User ${firstNameInput.val().trim()} (+91 ${userPhoneNumber}) requested contact info`);
+        } else {
+          otpError.show();
+          otpInputs.val('');
+          otpInputs.first().focus();
+        }
+      });
+
+      // Reset OTP form
+      function resetOtpForm() {
+        firstNameInput.val('');
+        phoneInput.val('');
+        otpInputs.val('');
+        $('.form-group').show();
+        submitDetailsBtn.show();
+        otpSection.hide();
+        contactContent.show();
+        contactSuccess.hide();
+        firstNameError.hide();
+        phoneError.hide();
+        otpError.hide();
+      }
+
+      // OTP input navigation
+      otpInputs.on('input', function() {
+        const index = parseInt($(this).attr('data-index'));
+        const value = $(this).val();
+        
+        if (value.length === 1) {
+          if (index < 3) {
+            otpInputs.eq(index + 1).focus();
+          } else {
+            $(this).blur();
+          }
+        }
+      });
+
+      // Allow backspace navigation
+      otpInputs.on('keydown', function(e) {
+        const index = parseInt($(this).attr('data-index'));
+        
+        if (e.key === 'Backspace' && $(this).val() === '' && index > 0) {
+          otpInputs.eq(index - 1).focus();
+        }
+      });
+
+      // Close popup when clicking outside
+      contactPopup.click(function(e) {
+        if ($(e.target).hasClass('contact-popup')) {
+          contactPopup.removeClass('active');
+          resetOtpForm();
+        }
+      });
+
+      // Enable submit button only when fields are filled
+      function checkFormValidity() {
+        const firstName = firstNameInput.val().trim();
+        const phone = phoneInput.val().trim();
+        
+        if (firstName !== '' && /^\d{10}$/.test(phone)) {
+          submitDetailsBtn.prop('disabled', false);
+        } else {
+          submitDetailsBtn.prop('disabled', true);
+        }
+      }
+
+      firstNameInput.on('input', checkFormValidity);
+      phoneInput.on('input', checkFormValidity);
+      
+      // Initialize with disabled button
+      submitDetailsBtn.prop('disabled', true);
+    });
+  </script>
+</body>
+</html>
